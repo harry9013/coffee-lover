@@ -245,7 +245,16 @@ export default function App() {
   const days = useMemo(() => monthDays(month), [month]);
   return (
     <div className={`app ${page === "shelf" ? style : "editorial"}`}>
-      <a href="#main" className="skip">
+      <a
+        href="#main"
+        className="skip"
+        onClick={(event) => {
+          event.preventDefault();
+          const main = document.getElementById("main");
+          main?.focus();
+          main?.scrollIntoView();
+        }}
+      >
         Skip to content
       </a>
       <aside className="sidebar">
@@ -337,7 +346,7 @@ export default function App() {
             </button>
           </div>
         </header>
-        <main id="main">
+        <main id="main" tabIndex={-1}>
           {storageError && (
             <div className="error" role="alert">
               {storageError}
@@ -1324,6 +1333,10 @@ function ExperimentDetail({
   onDelete: () => void;
 }) {
   const g = guidance(e);
+  const profileHorizon = Math.max(
+    e.duration,
+    ...e.profile.map((point) => point.seconds),
+  );
   return (
     <>
       <article className="brew-detail">
@@ -1424,7 +1437,7 @@ function ExperimentDetail({
                     points={e.profile
                       .map(
                         (p) =>
-                          `${35 + (p.seconds / e.duration) * 545},${130 - (p.bars / 16) * 100}`,
+                          `${35 + (p.seconds / profileHorizon) * 545},${130 - (p.bars / 16) * 100}`,
                       )
                       .join(" ")}
                     fill="none"
@@ -1437,7 +1450,7 @@ function ExperimentDetail({
                   {e.profile.map((p, i) => (
                     <circle
                       key={i}
-                      cx={35 + (p.seconds / e.duration) * 545}
+                      cx={35 + (p.seconds / profileHorizon) * 545}
                       cy={130 - (p.bars / 16) * 100}
                       r="3"
                       fill="var(--accent)"
@@ -1447,7 +1460,7 @@ function ExperimentDetail({
                     0 s
                   </text>
                   <text x="540" y="153">
-                    {e.duration} s
+                    {profileHorizon} s
                   </text>
                 </svg>
                 <details>

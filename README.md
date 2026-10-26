@@ -71,7 +71,7 @@ npm run test:ui
 
 UI tests use installed `/usr/bin/chromium` in this cloud environment. Set `CHROMIUM_PATH` for another system browser. If a downloaded Playwright browser is desired, install it and configure `launchOptions.executablePath` accordingly. Tests launch the Vite server automatically.
 
-Screenshots are in [docs/screenshots](docs/screenshots): three desktop homepages and mobile Shelf/Lab/Calendar/Places. The UI suite regenerates them. See [verification record](docs/VERIFICATION.md) for final results and limitations.
+Internal QA screenshots are in `docs/screenshots`: three desktop homepages and mobile Shelf/Lab/Calendar/Places. They are excluded from the delivered source ZIP. The UI suite regenerates them. See [verification record](docs/VERIFICATION.md) for final results and limitations.
 
 ## Next steps
 
@@ -82,3 +82,7 @@ Screenshots are in [docs/screenshots](docs/screenshots): three desktop homepages
 5. Validate on physical iOS/Android devices and with assistive technology; package native clients only after those decisions.
 
 Native mobile apps, production identity/sync, calibrated geographic maps, machine integration, offline service-worker installation and public hosting are not built.
+
+## Reviewed handover
+
+See [independent review](docs/REVIEW.md). The source ZIP contains tracked code and documents, excluding screenshots, dependencies, build caches and repository metadata. `scripts/package_deliverables.py` creates it and a standalone offline HTML preview after a build. The preview includes the functioning app and all three designs; no external hosting is required. Open the HTML in a modern desktop browser after download/unzip. Browser-local storage on file URLs varies by browser; export data before moving it. The source project remains the supported development route.

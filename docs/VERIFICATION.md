@@ -6,13 +6,17 @@ Cloud checkout: `/workspace/coffee-lover`. Branch: `work`. Initial repository wa
 
 - `npm run typecheck` — TypeScript project validation.
 - `npm run build` — production Vite bundle, approximately 298 kB JavaScript / 91 kB gzip, plus 31 kB CSS / 8 kB gzip.
-- `npm test` — **26 unit tests** covering mass ratios, cumulative pours, timing, local/leap dates, guidance precedence and uncertainty, nullable observations, import schema/references, missing values and persistence failure.
-- `TZ=Pacific/Kiritimati npm test` — same 26 tests in UTC+14, guarding against accidental UTC calendar grouping.
-- `npm run test:ui` — **10 Chromium scenarios**: three shared-data homepage designs; bean CRUD/persistence/cancel; trial duplication and changed-variable comparison; one-to-one calendar linking; pour validation; quick drinks; place coordinates/repeated visits; import/export; invalid/corrupt storage; quota failure; reset confirmation/empty state; browser back; timer pause/reset; map placement cancellation; focus return; responsive overflow checks.
+- `npm test` — **30 unit tests** covering mass ratios, cumulative pours, timing, local/leap dates, guidance precedence and uncertainty, nullable observations, import schema/references, missing values and persistence failure.
+- `TZ=Pacific/Kiritimati npm test` — same 30 tests in UTC+14, guarding against accidental UTC calendar grouping.
+- `npm run test:ui` — **13 Chromium scenarios**: three shared-data homepage designs; bean CRUD/persistence/cancel; trial duplication and changed-variable comparison; one-to-one calendar linking; pour validation; quick drinks; place coordinates/repeated visits; import/export; invalid/corrupt storage; quota failure; reset confirmation/empty state; browser back; timer pause/reset; map placement cancellation; focus return; responsive overflow checks.
 - Automated axe WCAG 2 A/AA and 2.1 AA checks: three homepages, Lab, Calendar, Places and the place dialog; zero detected violations in checked states. This is not a complete accessibility certification.
 - Responsive layout checked at 320, 390, 768 and 1440 CSS pixels. Screenshots cover all three desktop homepages, desktop Lab, mobile modules and a mobile experiment editor.
 - `npm audit --omit=dev` — zero reported production dependency vulnerabilities at validation time.
 - Source formatting and `git diff --check`.
+
+## Independent review
+
+A separate reviewer reproduced six defects and one coaching-rule concern. All were corrected and covered by regression checks; see `docs/REVIEW.md`. The final browser suite explicitly checks UTC+8 rollover, inert imported markup, same-method preservation and tablet settings access.
 
 ## Recovered failures
 
@@ -44,3 +48,7 @@ None. No pending approval or implementation blocker.
 - `docs/screenshots/mobile-experiment-editor.png` — numeric form at 390 px.
 
 Full-page mobile screenshots show the fixed bottom navigation at the viewport boundary; the live page scrolls behind it with reserved bottom padding.
+
+## Delivery
+
+Source-only ZIP and a self-contained functional offline preview are packaged by `scripts/package_deliverables.py`. Internal browser screenshots are excluded from all Library deliverables. `scripts/verify-offline.mjs` checks the standalone HTML with no external requests. Library upload results are reported separately after confirmed saving.

@@ -81,7 +81,9 @@ describe("conditional coaching", () => {
     a.sensory.sourness = 5;
     a.sensory.body = 5;
     a.sensory.strength = 1;
-    expect(guidance(a).test).not.toContain("yield");
+    expect(guidance(a).title).not.toBe("Concentrated, but sour");
+    a.flow = "fast";
+    expect(guidance(a).test).toContain("finer");
   });
   it("prioritizes repeatability for sour dry and stalled", () => {
     const a = espresso();
@@ -214,5 +216,47 @@ describe("unknown sensory and strength-specific advice", () => {
     e.sensory.sourness = 5;
     e.sensory.preference = 5;
     expect(guidance(e).title).toBe("Keep your preferred baseline");
+  });
+});
+
+describe("adversarial review regressions", () => {
+  it("keeps target pressure timing independent of actual shot duration", () => {
+    const e = espresso();
+    e.duration = 18;
+    expect(validateExperiment(e)).toEqual([]);
+    e.profileKind = "recorded";
+    expect(validateExperiment(e).length).toBeGreaterThan(0);
+  });
+  it("does not prescribe finer espresso grind without a fast-flow observation", () => {
+    const e = espresso();
+    e.sensory.sourness = 5;
+    e.sensory.strength = 2;
+    e.flow = "even";
+    expect(guidance(e).title).toBe("Compare with your own baseline");
+    e.flow = "fast";
+    expect(guidance(e).test).toContain("finer");
+  });
+  it("rejects cyclic lineage while allowing a valid trial", () => {
+    const d = structuredClone(sample);
+    d.experiments[0].parentId = d.experiments[1].id;
+    expect(() => parseImport(JSON.stringify(d))).not.toThrow();
+    d.experiments[1].parentId = d.experiments[0].id;
+    expect(() => parseImport(JSON.stringify(d))).toThrow();
+  });
+  it("validates writes before touching browser storage", () => {
+    let written = false;
+    Object.defineProperty(globalThis, "localStorage", {
+      configurable: true,
+      value: {
+        getItem: () => null,
+        setItem: () => {
+          written = true;
+        },
+      },
+    });
+    const d = structuredClone(sample);
+    d.drinks[0].notes = "x".repeat(10001);
+    expect(() => new LocalRepository().save(d)).toThrow();
+    expect(written).toBe(false);
   });
 });

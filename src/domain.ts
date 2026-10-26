@@ -171,14 +171,15 @@ export function validateExperiment(e: Experiment): string[] {
       if (
         !Number.isFinite(p.seconds) ||
         p.seconds < 0 ||
-        p.seconds > e.duration ||
+        p.seconds > 7200 ||
+        (e.profileKind === "recorded" && p.seconds > e.duration) ||
         (i > 0 && p.seconds <= e.profile[i - 1].seconds) ||
         !Number.isFinite(p.bars) ||
         p.bars < 0 ||
         p.bars > 16
       )
         errors.push(
-          `Profile point ${i + 1}: increasing time within brew duration and pressure 0–16 bar required.`,
+          `Profile point ${i + 1}: increasing time up to 7200 s and pressure 0–16 bar required; recorded points must be within actual duration.`,
         );
     });
   }
@@ -256,6 +257,21 @@ export function guidance(e: Experiment) {
       evidence: "Sourness recorded; flow is unknown.",
       hypothesis: "Several causes remain possible.",
       test: "Repeat the recipe and note whether flow is even, unusually fast, stalled or erratic before changing grind.",
+    };
+  if (
+    e.method === "espresso" &&
+    s.sourness >= 4 &&
+    s.strength < 4 &&
+    e.flow === "even"
+  )
+    return {
+      ...common,
+      title: "Compare with your own baseline",
+      evidence:
+        "Sour, lower-strength espresso with even flow; unusually fast flow was not reported.",
+      hypothesis:
+        "The current observations do not identify a grind or yield correction.",
+      test: "Repeat the recipe and compare flow and sweetness with your own baseline. Check the recorded yield and water source before choosing a grind change.",
     };
   if (s.sourness >= 4 && s.strength >= 4)
     return {
@@ -475,6 +491,22 @@ export function parseImport(raw: string): Data {
         e.parentId === e.id)
     )
       fail();
+  const byExperiment = new Map<string, Experiment>(
+    d.experiments.map((e: Experiment) => [e.id, e]),
+  );
+  const resolved = new Set<string>();
+  for (const e of d.experiments as Experiment[]) {
+    const path = new Set<string>();
+    let current: Experiment | undefined = e;
+    while (current && !resolved.has(current.id)) {
+      if (path.has(current.id)) fail();
+      path.add(current.id);
+      current = current.parentId
+        ? byExperiment.get(current.parentId)
+        : undefined;
+    }
+    for (const key of path) resolved.add(key);
+  }
   for (const r of d.drinks) {
     record(r);
     if (

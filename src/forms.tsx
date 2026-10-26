@@ -412,6 +412,7 @@ export function ExperimentForm({
             aria-pressed={e.method === m}
             className={e.method === m ? "selected" : ""}
             onClick={() =>
+              e.method !== m &&
               set({
                 ...e,
                 method: m,

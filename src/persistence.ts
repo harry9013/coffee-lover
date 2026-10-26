@@ -10,7 +10,9 @@ export class LocalRepository implements Repository {
     return value ? parseImport(value) : null;
   }
   save(data: Data) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    const serialized = JSON.stringify(data);
+    parseImport(serialized); // The write and import boundaries share one schema.
+    localStorage.setItem(STORAGE_KEY, serialized);
   }
 }
 export const exportData = (data: Data) => JSON.stringify(data, null, 2);

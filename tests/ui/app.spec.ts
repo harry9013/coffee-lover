@@ -409,3 +409,125 @@ test("narrow and tablet homepage variants plus Lab editor captures", async ({
   });
   await page.getByRole("button", { name: "Close dialog", exact: true }).click();
 });
+
+test("review fixes: skip link, stable method, target duration and tablet backup access", async ({
+  page,
+}) => {
+  await page
+    .getByRole("button", { name: "Experiment Lab", exact: true })
+    .click();
+  await page
+    .getByRole("link", { name: "Skip to content", exact: true })
+    .focus();
+  await page.keyboard.press("Enter");
+  await expect(
+    page.getByRole("heading", { name: "The Experiment Lab." }),
+  ).toBeVisible();
+  await expect(page.locator("main")).toBeFocused();
+  await page.getByRole("button", { name: /A sweeter morning/ }).click();
+  await page.getByRole("button", { name: "Edit", exact: true }).click();
+  await page.getByRole("button", { name: "Espresso", exact: true }).click();
+  await expect(
+    page.getByLabel("Observed duration (s)", { exact: true }),
+  ).toHaveValue("29");
+  await expect(page.getByLabel("Pressure (bar)", { exact: true })).toHaveCount(
+    5,
+  );
+  await page.getByLabel("Observed duration (s)", { exact: true }).fill("18");
+  await page
+    .getByRole("button", { name: "Save experiment", exact: true })
+    .click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByRole("alert")).toHaveCount(0);
+  await page.setViewportSize({ width: 768, height: 900 });
+  await page
+    .getByRole("button", { name: "Data & privacy", exact: true })
+    .click();
+  await expect(
+    page.getByRole("button", {
+      name: "Export version 1 JSON backup",
+      exact: true,
+    }),
+  ).toBeVisible();
+});
+
+test("text bounds survive reload and imported markup stays inert", async ({
+  page,
+}) => {
+  await page
+    .getByRole("button", { name: "Quick drink log", exact: true })
+    .click();
+  await page
+    .getByLabel("What did you drink?", { exact: true })
+    .fill("Length boundary");
+  await page
+    .getByLabel("A note to remember", { exact: true })
+    .fill("x".repeat(10001));
+  expect(
+    (await page.getByLabel("A note to remember", { exact: true }).inputValue())
+      .length,
+  ).toBe(10000);
+  await page.getByRole("button", { name: "Save drink", exact: true }).click();
+  await page.reload();
+  await expect(page.getByRole("alert")).toHaveCount(0);
+  const payload = await page.evaluate(() =>
+    JSON.parse(localStorage.getItem("coffee-lover.v1")!),
+  );
+  payload.beans[0].name = "<img src=x onerror=alert(1)>";
+  await page
+    .getByRole("button", { name: "Data & privacy", exact: true })
+    .click();
+  await page
+    .getByLabel("Import a Coffee Lover JSON backup", { exact: true })
+    .setInputFiles({
+      name: "escaped.json",
+      mimeType: "application/json",
+      buffer: Buffer.from(JSON.stringify(payload)),
+    });
+  await page.getByRole("button", { name: "Confirm", exact: true }).click();
+  await expect(
+    page.getByRole("button", {
+      name: "<img src=x onerror=alert(1)>",
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(page.locator('img[src="x"]')).toHaveCount(0);
+});
+
+test("calendar changes day at UTC+8 midnight without moving recorded dates", async ({
+  browser,
+}) => {
+  const context = await browser.newContext({ timezoneId: "Asia/Singapore" });
+  const page = await context.newPage();
+  await page.clock.setFixedTime(new Date("2026-10-26T15:59:59Z"));
+  await page.goto("/");
+  await page
+    .getByRole("button", { name: "Quick drink log", exact: true })
+    .click();
+  await expect(page.getByLabel("Local date", { exact: true })).toHaveValue(
+    "2026-10-26",
+  );
+  await page.getByRole("button", { name: "Cancel", exact: true }).click();
+  await page.clock.setFixedTime(new Date("2026-10-26T16:00:00Z"));
+  await page
+    .getByRole("button", { name: "Quick drink log", exact: true })
+    .click();
+  await expect(page.getByLabel("Local date", { exact: true })).toHaveValue(
+    "2026-10-27",
+  );
+  await page
+    .getByLabel("What did you drink?", { exact: true })
+    .fill("After local midnight");
+  await page.getByRole("button", { name: "Save drink", exact: true }).click();
+  const saved = await page.evaluate(() =>
+    JSON.parse(localStorage.getItem("coffee-lover.v1")!),
+  );
+  expect(
+    saved.drinks.find((d: any) => d.name === "After local midnight").date,
+  ).toBe("2026-10-27");
+  expect(saved.drinks.find((d: any) => d.id === "drink-1").date).toBe(
+    "2026-10-26",
+  );
+  await context.close();
+});

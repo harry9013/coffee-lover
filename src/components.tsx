@@ -76,9 +76,17 @@ export function Field({
             children as ReactElement<{
               id?: string;
               "aria-describedby"?: string;
+              maxLength?: number;
             }>,
             {
               id: fieldId,
+              ...(["input", "textarea"].includes(String(children.type))
+                ? {
+                    maxLength:
+                      (children.props as { maxLength?: number }).maxLength ??
+                      10000,
+                  }
+                : {}),
               "aria-describedby": hint ? `${fieldId}-hint` : undefined,
             },
           )

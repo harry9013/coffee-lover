@@ -2444,3 +2444,9 @@ dialog::backdrop {
     font-size: 8px;
   }
 }
+
+@media (min-width: 601px) and (max-width: 850px) {
+  .mobile-settings {
+    display: inline-flex;
+  }
+}
