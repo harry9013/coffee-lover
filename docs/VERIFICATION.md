@@ -5,7 +5,7 @@ Cloud checkout: `/workspace/coffee-lover`. Branch: `work`. Initial repository wa
 ## Passed
 
 - `npm run typecheck` — TypeScript project validation.
-- `npm run build` — production Vite bundle, approximately 298 kB JavaScript / 91 kB gzip, plus 31 kB CSS / 8 kB gzip.
+- `npm run build` — production Vite bundle, approximately 299 kB JavaScript / 92 kB gzip, plus 31 kB CSS / 8 kB gzip.
 - `npm test` — **30 unit tests** covering mass ratios, cumulative pours, timing, local/leap dates, guidance precedence and uncertainty, nullable observations, import schema/references, missing values and persistence failure.
 - `TZ=Pacific/Kiritimati npm test` — same 30 tests in UTC+14, guarding against accidental UTC calendar grouping.
 - `npm run test:ui` — **13 Chromium scenarios**: three shared-data homepage designs; bean CRUD/persistence/cancel; trial duplication and changed-variable comparison; one-to-one calendar linking; pour validation; quick drinks; place coordinates/repeated visits; import/export; invalid/corrupt storage; quota failure; reset confirmation/empty state; browser back; timer pause/reset; map placement cancellation; focus return; responsive overflow checks.
@@ -28,7 +28,7 @@ A separate reviewer reproduced six defects and one coaching-rule concern. All we
 
 ## Failed / blocked final checks
 
-None. No pending approval or implementation blocker.
+No failing application checks or pending approval. Direct `file://` preview verification was blocked by cloud Chromium administrator policy (`ERR_BLOCKED_BY_ADMINISTRATOR`). No file navigation retry or policy bypass was attempted. The self-contained HTML is instead checked with a loopback-only static server; no external hosting.
 
 ## Unrun / limits
 

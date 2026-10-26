@@ -86,3 +86,5 @@ Native mobile apps, production identity/sync, calibrated geographic maps, machin
 ## Reviewed handover
 
 See [independent review](docs/REVIEW.md). The source ZIP contains tracked code and documents, excluding screenshots, dependencies, build caches and repository metadata. `scripts/package_deliverables.py` creates it and a standalone offline HTML preview after a build. The preview includes the functioning app and all three designs; no external hosting is required. Open the HTML in a modern desktop browser after download/unzip. Browser-local storage on file URLs varies by browser; export data before moving it. The source project remains the supported development route.
+
+The cloud browser prohibits direct `file://` navigation. The standalone preview is verified using a loopback-only static server, not an external host. If direct opening is restricted in your browser, serve the downloaded preview folder with `python3 -m http.server --bind 127.0.0.1 8000` and open the local address. Direct file opening remains untested here.
